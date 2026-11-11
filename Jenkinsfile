@@ -54,12 +54,24 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    docker compose up -d
-                    docker compose ps
-                '''
+                   set -e
+
+                   echo "Removing old microservice containers..."
+
+                   docker rm -f \
+                      user_auth_container \
+                      product_management_container \
+                      order_processing_container 2>/dev/null || true
+
+                  echo "Deploying latest microservices..."
+
+                  docker compose up -d --remove-orphans --force-recreate
+
+                  echo "Deployment completed"
+                  docker compose ps
+              '''
             }
         }
-
         stage('Health Check') {
             steps {
                 sh '''
