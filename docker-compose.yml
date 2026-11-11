@@ -6,7 +6,7 @@ services:
       context: ./user_auth
       dockerfile: Dockerfile
 
-    image: user_auth_service:latest
+    image: 292594542747.dkr.ecr.ap-southeast-2.amazonaws.com/user-auth:v1
     container_name: user_auth_container
 
     environment:
@@ -39,7 +39,7 @@ services:
       context: ./product_management
       dockerfile: Dockerfile
 
-    image: product_management_service:latest
+    image: 292594542747.dkr.ecr.ap-southeast-2.amazonaws.com/product-management:v1
     container_name: product_management_container
 
     environment:
@@ -72,7 +72,7 @@ services:
       context: ./order_processing
       dockerfile: Dockerfile
 
-    image: order_processing_service:latest
+    image: 292594542747.dkr.ecr.ap-southeast-2.amazonaws.com/order-processing:v1
     container_name: order_processing_container
 
     environment:
