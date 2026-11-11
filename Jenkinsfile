@@ -58,7 +58,8 @@ pipeline {
 
                    echo "Removing old microservice containers..."
 
-                   docker rm -f \
+                   docker rm -f nginx_reverse_proxy || true
+                      docker rm -f \
                       user_auth_container \
                       product_management_container \
                       order_processing_container 2>/dev/null || true
