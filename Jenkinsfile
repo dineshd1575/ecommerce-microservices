@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    options {
+        disableConcurrentBuilds(abortPrevious: true)
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
     environment {
         JWT_SECRET_KEY = 'test-only-secret-key-for-ci-pipeline-123456789'
         AWS_REGION = 'ap-southeast-2'
