@@ -10,10 +10,6 @@ db.init_app(app)
 
 jwt = JWTManager(app)
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
 @app.route('/orders', methods=['POST'])
 @jwt_required()
 def create_order():
@@ -52,6 +48,17 @@ def get_orders():
     user_id = get_jwt_identity()
     orders = Order.query.filter_by(user_id=user_id).all()
     return jsonify([{'id': order.id, 'product_id': order.product_id, 'quantity': order.quantity, 'status': order.status} for order in orders]), 200
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        'service': 'order_processing',
+        'status': 'healthy'
+    }), 200
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5002)

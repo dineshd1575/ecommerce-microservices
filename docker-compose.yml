@@ -1,40 +1,138 @@
-version: '3.8'
-
 services:
+
+  # User Authentication Microservice
   user_auth:
     build:
       context: ./user_auth
       dockerfile: Dockerfile
+
     image: user_auth_service:latest
     container_name: user_auth_container
-    ports:
-      - "5001:5000"
+
+    environment:
+      DATABASE_URL: sqlite:////data/users.db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+
+    volumes:
+      - users_data:/data
+
     networks:
       - microservices_network
 
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # Product Management Microservice
   product_management:
     build:
       context: ./product_management
       dockerfile: Dockerfile
+
     image: product_management_service:latest
     container_name: product_management_container
-    ports:
-      - "5002:5000"
+
+    environment:
+      DATABASE_URL: sqlite:////data/products.db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+
+    volumes:
+      - products_data:/data
+
     networks:
       - microservices_network
 
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # Order Processing Microservice
   order_processing:
     build:
       context: ./order_processing
       dockerfile: Dockerfile
+
     image: order_processing_service:latest
     container_name: order_processing_container
-    ports:
-      - "5003:5000"
+
     environment:
+      DATABASE_URL: sqlite:////data/orders.db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       PRODUCT_SERVICE_URL: http://product_management:5000
+
+    volumes:
+      - orders_data:/data
+
     networks:
       - microservices_network
 
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:latest
+    container_name: nginx_reverse_proxy
+
+    ports:
+      - "8088:80"
+
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+    depends_on:
+      user_auth:
+        condition: service_healthy
+      product_management:
+        condition: service_healthy
+      order_processing:
+        condition: service_healthy
+
+    networks:
+      - microservices_network
+
+    restart: unless-stopped
+
+
+# Docker named volumes for database persistence
+volumes:
+  users_data:
+  products_data:
+  orders_data:
+
+
+# Docker bridge network
 networks:
   microservices_network:
+    driver: bridge

@@ -10,10 +10,6 @@ db.init_app(app)
 jwt = JWTManager(app)
 
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
 @app.route('/products', methods=['POST']) # Create
 @jwt_required()
 def create_product():
@@ -58,6 +54,17 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
     return jsonify({'message': 'Product deleted successfully'}), 200
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({
+        'service': 'product_management',
+        'status': 'healthy'
+    }), 200
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

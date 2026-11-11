@@ -4,3 +4,4 @@ Flask-JWT-Extended==4.4.0
 Werkzeug==2.2.2
 requests==2.28.1
 SQLAlchemy==1.4.31
+gunicorn==23.0.0
