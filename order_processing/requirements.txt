@@ -5,3 +5,4 @@ Werkzeug==2.2.2
 requests==2.28.1
 SQLAlchemy==1.4.31
 gunicorn==23.0.0
+requests-mock==1.12.1
