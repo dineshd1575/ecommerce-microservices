@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         PROJECT_DIR = '/home/ec2-user/AWS-Microservices-DevOps/ecommerce-microservices'
+        JWT_SECRET_KEY = 'test-only-secret-key-for-ci-pipeline-123456789'
     }
 
     stages {
@@ -35,22 +36,21 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 sh '''
-                    set -e
+                   set -e
 
-                    for service in user_auth product_management order_processing
-                    do
-                        echo "Running tests for $service"
+                   for service in user_auth product_management order_processing
+                   do
+                       echo "Running tests for $service"
 
-                        docker compose run --rm \
-                            --no-deps \
-                            --entrypoint python \
-                            $service -m unittest discover \
-                            -s . -p 'test_app.py' -v
-                    done
-                '''
-            }
+                       docker compose run --rm \
+                         --no-deps \
+                         -e JWT_SECRET_KEY="$JWT_SECRET_KEY" \
+                         --entrypoint python \
+                         $service -m unittest discover -s . -p test_app.py -v
+                   done
+               '''
+           }
         }
-
         stage('Deploy') {
             steps {
                 sh '''
